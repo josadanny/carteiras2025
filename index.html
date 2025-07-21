@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Carteiras Estudantis 2025</title>
+  <style>
+    body { font-family: Arial; background: #f3f3f3; padding: 20px; }
+    form { background: #fff; padding: 20px; margin-bottom: 30px; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
+    label { display: block; margin-top: 10px; }
+    input { width: 100%; padding: 8px; margin-top: 5px; border-radius: 5px; border: 1px solid #ccc; }
+    button { margin-top: 15px; background: green; color: white; padding: 10px; width: 100%; border: none; border-radius: 5px; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+<h2>Pedidos de Carteiras Estudantis 2025</h2>
+
+<form onsubmit="handleSubmit(event, 'Secundarista')">
+  <h3>Carteira Secundarista</h3>
+  <p><strong>Educação Infantil, Ensino Fundamental e Médio</strong> – R$ 20,00</p>
+  <label>Nome:<input name="nome" required></label>
+  <label>Escola:<input name="escola" required></label>
+  <label>Série:<input name="serie" required></label>
+  <label>CPF:<input name="cpf" required></label>
+  <label>Nascimento:<input type="date" name="nascimento" required></label>
+  <label>Número WhatsApp:<input type="tel" name="whatsapp" placeholder="DDD + número" required></label>
+  <label>Foto:<input type="file" name="foto" accept="image/*" required></label>
+  <button type="submit">Enviar para WhatsApp</button>
+</form>
+
+<form onsubmit="handleSubmit(event, 'Universitário')">
+  <h3>Carteira Universitária</h3>
+  <p><strong>Ensino Superior ou Técnico</strong> – R$ 30,00</p>
+  <label>Nome:<input name="nome" required></label>
+  <label>Entidade:<input name="entidade" required></label>
+  <label>Curso:<input name="curso" required></label>
+  <label>Período:<input name="periodo" required></label>
+  <label>CPF:<input name="cpf" required></label>
+  <label>Nascimento:<input type="date" name="nascimento" required></label>
+  <label>Número WhatsApp:<input type="tel" name="whatsapp" placeholder="DDD + número" required></label>
+  <label>Foto:<input type="file" name="foto" accept="image/*" required></label>
+  <button type="submit">Enviar para WhatsApp</button>
+</form>
+
+<script>
+const scriptURL = "URL_DO_SEU_WEBAPP";
+
+function handleSubmit(event, tipo) {
+  event.preventDefault();
+  const form = event.target;
+  const f = new FormData(form);
+
+  const fotoFile = f.get('foto');
+  const reader = new FileReader();
+
+  reader.onload = function () {
+    const fotoBase64 = reader.result;
+    const data = {
+      nome: f.get('nome'),
+      escola: f.get('escola'),
+      serie: f.get('serie'),
+      entidade: f.get('entidade'),
+      curso: f.get('curso'),
+      periodo: f.get('periodo'),
+      cpf: f.get('cpf'),
+      nascimento: f.get('nascimento'),
+      whatsapp: f.get('whatsapp'),
+      tipo: tipo,
+      foto: fotoBase64
+    };
+
+    // Envia para o Google Sheets
+    fetch(scriptURL, {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }).then(() => {
+      // Abre o WhatsApp com os dados para o SEU número
+      const msg = `📚 *Pedido de Carteira ${tipo}*\n\n` +
+        `👤 Nome: ${data.nome}\n` +
+        (tipo === 'Secundarista' ? `🏫 Escola: ${data.escola}\n📘 Série: ${data.serie}\n` : `🏛️ Entidade: ${data.entidade}\n🎓 Curso: ${data.curso}\n📆 Período: ${data.periodo}\n`) +
+        `📄 CPF: ${data.cpf}\n🎂 Nascimento: ${data.nascimento}\n📞 WhatsApp do aluno: ${data.whatsapp}`;
+
+      const link = `https://wa.me/5598992070758?text=${encodeURIComponent(msg)}%0A📸 Foto: enviada no formulário`;
+      window.open(link, '_blank');
+      alert("Dados enviados com sucesso!");
+      form.reset();
+    }).catch(err => alert("Erro ao enviar para a planilha: " + err));
+  };
+
+  reader.readAsDataURL(fotoFile);
+}
+</script>
+
+</body>
+</html>
